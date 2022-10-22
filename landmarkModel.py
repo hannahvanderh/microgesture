@@ -14,7 +14,7 @@ from sklearn.metrics import confusion_matrix, classification_report
 dataset = '/home/exx/hannah/GitProjects/microgesture/processedImages.csv'
 model_save_path = 'landmarkClassifier.hdf5'
 
-NUM_CLASSES = 48 #number of gestures
+NUM_CLASSES = 49 #number of gestures
 RANDOM_SEED = 42
 
 def print_confusion_matrix(y_true, y_pred, report=True):
@@ -37,7 +37,7 @@ print(os.listdir(os.getcwd()))
 labels = np.loadtxt(fname=dataset, delimiter=',', dtype='int32', usecols=(0), skiprows=1)
 features = np.loadtxt(dataset, delimiter=',', dtype='float32', usecols=list(range(2, (21 * 2) + 2)), skiprows=1)
 
-featuresTrain, featuresTest, labelsTrain, labelsText = train_test_split(features, features, train_size=0.75, random_state=RANDOM_SEED)
+featuresTrain, featuresTest, labelsTrain, labelsText = train_test_split(features, labels, train_size=0.75, random_state=RANDOM_SEED)
 
 model = tf.keras.models.Sequential([
     tf.keras.layers.Input((21 * 2, )),

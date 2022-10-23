@@ -40,8 +40,9 @@ def log_csv(number, landmark_list):
         writer.writerow([number, *landmark_list])
     return
 
-def calc_landmark_list(image, hand, landmark_point):
+def calc_landmark_list(image, hand):
     image_width, image_height = image.shape[1], image.shape[0]
+    landmark_point = []
 
     # Keypoint
     for _, landmark in enumerate(hand.landmark):
@@ -84,12 +85,15 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # inputFolder = "/data/MGDataset/real_data_224/rgb/"
 inputFolder = "/data/MGDataset/real_data_216x384/rgb/"
-paths = glob.glob(inputFolder + "/*.png")
-print("Paths: " + str(paths.__sizeof__()))
+# paths = glob.glob(inputFolder + "/*.png")
+paths = sorted(os.listdir(inputFolder))
+pathsCount = paths.__sizeof__()
+print("Paths: " + str(pathsCount))
 frameCount = 0
 failedDetectionCount = 0
 videos = {}
 videoCount = 0
+imageCount = 0
 framesToGather = 50
 
 failedDetections = "/home/exx/hannah/GitProjects/microgesture/failedDetections.txt"
@@ -116,7 +120,10 @@ mpDraw = mp.solutions.drawing_utils
 #TODO create videos from all paths
 #trim videos down to center frames
 #use those frames to create the master array of landmarks
-for img_path in paths:
+for index, img_path in enumerate(paths):
+    imageCount+=1
+    print("Image:" + str(imageCount) + "/" + str(pathsCount))
+
     split = img_path.split("_")
     keySplit = img_path.split("/")
     videoKey = keySplit[-1].rsplit("_", 1)[0]
@@ -132,10 +139,10 @@ for img_path in paths:
     
     if video:
         frameIndex = split[-1].split("=")[1].split(".")[0]
-        video.addFrame(int(frameIndex), img_path)
+        video.addFrame(int(frameIndex), inputFolder + img_path)
 
 for key, video in videos.items():
-    landmarkArray = []
+    normalized = []
     handCount = 0
     print(key)
     failedDetectionFile.write(key)
@@ -154,20 +161,22 @@ for key, video in videos.items():
         if hands_result: 
             #on fail use last result?
             for index, hand in enumerate(hands_result):
-                landmarkArray = calc_landmark_list(image, hand, landmarkArray)
+                landmarkArray = calc_landmark_list(image, hand)
+                for landmark in pre_process_landmark(landmarkArray):
+                    normalized.append(landmark)
                 handCount+=1
+
+                #todo draw landmarks and save a few images
             if handCount == framesToGather:
                 break
         else:
-            #print("No hand result " + frame_path)
+            #todo save some failed images
+
             failedDetectionFile.write(frame_path + "\n")
             failedDetectionCount+=1
-
         frameCount+=1
-        #print("Frame:" + str(frameCount))
+
     if(handCount == framesToGather):
-        #normalize these one at a time?
-        normalized = pre_process_landmark(landmarkArray)
         log_csv(video.gestureIndex, normalized)  
     else:
         print("Failed to get enough frames")  

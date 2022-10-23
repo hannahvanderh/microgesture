@@ -69,6 +69,7 @@ model_save_path = '/home/exx/hannah/GitProjects/microgesture/landmarkClassifier.
 
 NUM_CLASSES = 49 #number of gestures
 RANDOM_SEED = 42
+LANDMARKS = 2100 #21 * 2 * frames gathered
 
 def PlotCM(cm, classes, normalize=False, title='Confusion matrix', cmap=plt.cm.Blues):
 		'''
@@ -97,15 +98,14 @@ def PlotCM(cm, classes, normalize=False, title='Confusion matrix', cmap=plt.cm.B
 		plt.ylabel('True label')
 		plt.xlabel('Predicted label')
 
-print(os.listdir(os.getcwd()))
 # featuresArray = np.loadtxt(fname=dataset, delimiter=':', dtype='str', usecols=(2), skiprows=1) #update for my csv layout
 labels = np.loadtxt(fname=dataset, delimiter=',', dtype='int32', usecols=(0), skiprows=1)
-features = np.loadtxt(dataset, delimiter=',', dtype='float32', usecols=list(range(1, (21 * 2) + 1)), skiprows=1)
+features = np.loadtxt(dataset, delimiter=',', dtype='float32', usecols=list(range(1, LANDMARKS + 1)), skiprows=1)
 
 featuresTrain, featuresTest, labelsTrain, labelsText = train_test_split(features, labels, train_size=0.75, random_state=RANDOM_SEED)
 
 model = tf.keras.models.Sequential([
-    tf.keras.layers.Input((21 * 2, )),
+    tf.keras.layers.Input(LANDMARKS),
     tf.keras.layers.Dropout(0.2),
     tf.keras.layers.Dense(20, activation='relu'),
     tf.keras.layers.Dropout(0.4),
@@ -117,8 +117,6 @@ model.summary()  # tf.keras.utils.plot_model(model, show_shapes=True)
 
 cp_callback = tf.keras.callbacks.ModelCheckpoint(
     model_save_path, verbose=1, save_weights_only=False)
-
-es_callback = tf.keras.callbacks.EarlyStopping(patience=20, verbose=1)
 
 model.compile(
     optimizer='adam',
@@ -132,7 +130,7 @@ model.fit(
     epochs=1000,
     batch_size=128,
     validation_data=(featuresTest, labelsText),
-    callbacks=[cp_callback, es_callback]
+    callbacks=[cp_callback]
 )
 
 val_loss, val_acc = model.evaluate(featuresTest, labelsText, batch_size=128)
@@ -147,9 +145,7 @@ y_pred = np.argmax(Y_pred, axis=1)
 
 cm = confusion_matrix(labelsText, y_pred)
 # print_confusion_matrix(labelsText, y_pred)
-PlotCM(cm, classMap, normalize=False, title='Test Accuracy after 2 Epochs')
+PlotCM(cm, classMap.values(), normalize=False, title='Accuracy')
 plt.savefig('/home/exx/hannah/GitProjects/microgesture/testCM.png')
-print('Classification Report')
-print(classification_report(labelsText, y_pred))
 
 model.save(model_save_path, include_optimizer=False)

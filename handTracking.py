@@ -17,7 +17,6 @@ import numpy as np
 import torch
 import glob
 
-
 #TODO
 #make default parameters and allow the user to pass in the gesture video name, name output files accordingly
 #load and process an entire directory of videos (wild animals dataset from last semester)
@@ -49,7 +48,7 @@ if os.path.exists(handInfoCsv):
 
 failedDetectionFile = open(failedDetections, 'w', newline='')
 csvfile = open(handInfoCsv, 'w', newline='')
-fieldnames = ['Label', "Name", "Landmarks"]
+fieldnames = ['Label', "Landmarks"]
 writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter =',', quoting=csv.QUOTE_NONE,
                             escapechar=' ')
 writer.writeheader()
@@ -84,7 +83,7 @@ for img_path in paths:
                 #count these to make sure they are right, remove filepath from csv
 
             mpDraw.draw_landmarks(frame, hand, mpHands.HAND_CONNECTIONS)
-            writer.writerow({'Label': getLabelIndex(img_path), 'Name':img_path, 'Landmarks':landmarkArray.rstrip(landmarkArray[-1])})
+            writer.writerow({'Label': getLabelIndex(img_path), 'Landmarks':landmarkArray.rstrip(landmarkArray[-1])})
     else:
         print("No hand result " + img_path)
         failedDetectionFile.write(img_path + "\n")

@@ -10,32 +10,97 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, classification_report
+import itertools
+
+classMap = {
+'tap_on_distal_phalanx_of_index_finger_using_thumb': '0',
+'one': '1', 
+'double_tap_on_distal_phalanx_for_ring_finger_with_thumb': '10',
+'index_finger_swipe_right': '11',
+'index_finger_swipe_down': '12',
+'tap_on_distal_phalanx_of_last_finger_using_thumb': '13',
+'tap_on_distal_phalanx_of_middle_finger_using_thumb': '14',
+'index_finger_single_tap': '15', 
+'hand_close': '16', 
+'tap_on_middle_phalanx_of_index_finger_using_thumb': '17', 
+'two': '18', 
+'tap_on_proximal_phalanx_of_index_finger_using_thumb': '19',
+'double_tap_on_middle_phalanx_for_index_finger_with_thumb': '2',
+'zoom_out_with_index_finger_and_thumb': '20', 
+'double_tap_on_middle_phalanx_for_last_finger_using_thumb': '21',
+'index_finger_swipe_up': '22',
+'rub_thumb_on_index_finger_forward': '23',
+'rub_thumb_on_index_finger_backward': '24', 
+'tap_on_distal_phalanx_of_ring_finger_with_thumb': '25', 
+'double_tap_on_distal_phalanx_for_last_finger_using_thumb': '26', 
+'three': '27', 
+'double_tap_on_proximal_phalanx_of_last_finger_using_thumb': '28', 
+'index_finger_double_tap': '29',
+'select_with_thumb_and_finger': '3', 
+'rotate_index_finger_anti-clockwise': '30', 
+'double_tap_on_distal_phalanx_for_index_finger_using_thumb': '31',
+'rub_on_index_finger_with_thumb_clockwise': '32', 
+'double_tap_on_proximal_phalanx_for_index_finger_using_thumb': '33',
+'tap_on_middle_phalanx_of_middle_finger_using_thumb': '34',
+'tap_on_proximal_phalanx_of_last_finger_using_thumb': '35',
+'tap_on_middle_phalanx_of_last_finger_using_thumb': '36',
+'index_finger_swipe_left': '37',
+'tap_on_proximal_phalanx_of_ring_finger_using_thumb': '38',
+'four': '39',
+'rub_on_index_finger_with_thumb_anti-clockwise': '4',
+'double_tap_on_proximal_phalanx_for_ring_finger_with_thumb': '40',
+'zoom_out_with_fingers': '41',
+'rotate_index_finger_clockwise': '42',
+'double_tap_on_distal_phalanx_for_middle_finger_using_thumb': '43',
+'double_tap_on_middle_phalanx_for_middle_finger_using_thumb': '44',
+'zoom_in_with_fingers': '45',
+'five': '46',
+'double_tap_on_middle_phalanx_for_ring_finger_with_thumb': '47',
+'snap': '48',
+'double_tap_on_proximal_phalanx_for_middle_finger_using_thumb': '5',
+'tap_on_middle_phalanx_of_ring_finger_with_thumb': '6',
+'tap_on_proximal_phalanx_of_middle_finger_using_thumb': '7', 
+'hand_open': '8',
+'zoom_in_with_index_finger_and_thumb': '9'
+}
 
 dataset = '/home/exx/hannah/GitProjects/microgesture/processedImages.csv'
-model_save_path = 'landmarkClassifier.hdf5'
+model_save_path = '/home/exx/hannah/GitProjects/microgesture/landmarkClassifier.hdf5'
 
 NUM_CLASSES = 49 #number of gestures
 RANDOM_SEED = 42
 
-def print_confusion_matrix(y_true, y_pred, report=True):
-    labels = sorted(list(set(y_true)))
-    cmx_data = confusion_matrix(y_true, y_pred, labels=labels)
-    
-    df_cmx = pd.DataFrame(cmx_data, index=labels, columns=labels)
- 
-    fig, ax = plt.subplots(figsize=(7, 6))
-    sns.heatmap(df_cmx, annot=True, fmt='g' ,square=False)
-    ax.set_ylim(len(set(y_true)), 0)
-    plt.show()
-    
-    if report:
-        print('Classification Report')
-        print(classification_report(labelsText, y_pred))
+def PlotCM(cm, classes, normalize=False, title='Confusion matrix', cmap=plt.cm.Blues):
+		'''
+			This function code is from: https://deeplizard.com/learn/video/0LhiS6yu2qQ
+		'''
+		if normalize:
+			cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+			print("Normalized confusion matrix")
+		else:
+			print('Confusion matrix, without normalization')
+	
+		print(cm)
+		plt.imshow(cm, interpolation='nearest', cmap=cmap)
+		plt.title(title)
+		plt.colorbar()
+		tick_marks = np.arange(len(classes))
+		plt.xticks(tick_marks, classes, rotation=45)
+		plt.yticks(tick_marks, classes)
+
+		fmt = '.2f' if normalize else 'd'
+		thresh = cm.max() / 2.
+		for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+			plt.text(j, i, format(cm[i, j], fmt), horizontalalignment="center", color="white" if cm[i, j] > thresh else "black")
+	
+		plt.tight_layout()
+		plt.ylabel('True label')
+		plt.xlabel('Predicted label')
 
 print(os.listdir(os.getcwd()))
 # featuresArray = np.loadtxt(fname=dataset, delimiter=':', dtype='str', usecols=(2), skiprows=1) #update for my csv layout
 labels = np.loadtxt(fname=dataset, delimiter=',', dtype='int32', usecols=(0), skiprows=1)
-features = np.loadtxt(dataset, delimiter=',', dtype='float32', usecols=list(range(2, (21 * 2) + 2)), skiprows=1)
+features = np.loadtxt(dataset, delimiter=',', dtype='float32', usecols=list(range(1, (21 * 2) + 1)), skiprows=1)
 
 featuresTrain, featuresTest, labelsTrain, labelsText = train_test_split(features, labels, train_size=0.75, random_state=RANDOM_SEED)
 
@@ -80,6 +145,11 @@ print(np.argmax(np.squeeze(predict_result)))
 Y_pred = model.predict(featuresTest)
 y_pred = np.argmax(Y_pred, axis=1)
 
-print_confusion_matrix(labelsText, y_pred)
+cm = confusion_matrix(labelsText, y_pred)
+# print_confusion_matrix(labelsText, y_pred)
+PlotCM(cm, classMap, normalize=False, title='Test Accuracy after 2 Epochs')
+plt.savefig('/home/exx/hannah/GitProjects/microgesture/testCM.png')
+print('Classification Report')
+print(classification_report(labelsText, y_pred))
 
 model.save(model_save_path, include_optimizer=False)

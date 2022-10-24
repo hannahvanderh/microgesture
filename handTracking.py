@@ -84,7 +84,8 @@ cuda = True if torch.cuda.is_available() else False
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # inputFolder = "/data/MGDataset/real_data_224/rgb/"
-inputFolder = "/data/MGDataset/real_data_216x384/rgb/"
+#inputFolder = "/data/MGDataset/real_data_216x384/rgb/"
+inputFolder = "/data/MGDataset/real_data_v2/rgb/"
 # paths = glob.glob(inputFolder + "/*.png")
 paths = sorted(os.listdir(inputFolder))
 pathsCount = paths.__sizeof__()

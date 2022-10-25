@@ -5,6 +5,8 @@
 # https://github.com/techfort/opencv-mediapipe-hand-gesture-recognition
 # using handTracking_hannah enviroment
 
+from pickle import FALSE, TRUE
+from types import NoneType
 import cv2
 import csv
 import mediapipe as mp
@@ -39,6 +41,15 @@ def log_csv(number, landmark_list):
         writer = csv.writer(f)
         writer.writerow([number, *landmark_list])
     return
+
+def processHands(hands_result, save, name):
+    for index, hand in enumerate(hands_result):
+        landmarkArray = calc_landmark_list(image, hand)
+        for landmark in pre_process_landmark(landmarkArray):
+            normalized.append(landmark)
+        if save == TRUE:
+            mpDraw.draw_landmarks(frame, hand, mpHands.HAND_CONNECTIONS)
+            cv2.imwrite("/home/exx/hannah/GitProjects/microgesture/savedImages/" + str(name) + ".png", frame)
 
 def calc_landmark_list(image, hand):
     image_width, image_height = image.shape[1], image.shape[0]
@@ -87,15 +98,17 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 #inputFolder = "/data/MGDataset/real_data_216x384/rgb/"
 inputFolder = "/data/MGDataset/real_data_v2/rgb/"
 # paths = glob.glob(inputFolder + "/*.png")
+
 paths = sorted(os.listdir(inputFolder))
 pathsCount = paths.__sizeof__()
 print("Paths: " + str(pathsCount))
+
 frameCount = 0
 failedDetectionCount = 0
-videos = {}
 videoCount = 0
 imageCount = 0
-framesToGather = 50
+framesToGather = 30
+videos = {}
 
 failedDetections = "/home/exx/hannah/GitProjects/microgesture/failedDetections.txt"
 if os.path.exists(failedDetections):
@@ -109,7 +122,6 @@ failedDetectionFile = open(failedDetections, 'w', newline='')
 
 # initialize mediapipe
 mpHands = mp.solutions.hands
-hands = mpHands.Hands(max_num_hands=1, min_detection_confidence=0.5, min_tracking_confidence=0.5)
 mpDraw = mp.solutions.drawing_utils
 
 #config file of settings?
@@ -142,39 +154,46 @@ for index, img_path in enumerate(paths):
         frameIndex = split[-1].split("=")[1].split(".")[0]
         video.addFrame(int(frameIndex), inputFolder + img_path)
 
-for key, video in videos.items():
+for videoKey, video in videos.items():
     normalized = []
     handCount = 0
-    print(key)
-    failedDetectionFile.write(key)
-    videoCount+=1
+    frameCount = 0
+    lastResult = NoneType
+    hands = mpHands.Hands(max_num_hands=1, min_detection_confidence=0.5, min_tracking_confidence=0.5)
+
+    print(videoKey)
     print("Video:" + str(videoCount) + "/" + str(len(videos)))
+    videoCount+=1
 
-    for key, frame_path in video.trimFrames().items():
-        image = cv2.imread(frame_path)
-        h, w, c = image.shape
-        frame = cv2.flip(image, 1)
-        framergb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        result_hands = hands.process(framergb)
+    items = video.trimFrames().items()
+    for frameKey, frame_path in items:
+        if frameCount >= 20:
+            image = cv2.imread(frame_path)
+            h, w, c = image.shape
 
-        hands_result = result_hands.multi_hand_landmarks
+            frame = cv2.flip(image, 1)
+            framergb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        if hands_result: 
-            #on fail use last result?
-            for index, hand in enumerate(hands_result):
-                landmarkArray = calc_landmark_list(image, hand)
-                for landmark in pre_process_landmark(landmarkArray):
-                    normalized.append(landmark)
-                handCount+=1
+            result_hands = hands.process(framergb)
+            hands_result = result_hands.multi_hand_landmarks
 
-                #todo draw landmarks and save a few images
+            if hands_result: 
+                lastResult = hands_result
+                # processHands(hands_result, frameCount == 20, videoKey)
+                processHands(hands_result, FALSE, '')
+                
+            else:
+                processHands(lastResult, FALSE, '')
+
+                failedDetectionFile.write(frame_path + "\n")
+                failedDetectionCount+=1
+                if failedDetectionCount % 10 == 0:
+                    cv2.imwrite("/home/exx/hannah/GitProjects/microgesture/failedDetections/" + str(failedDetectionCount) + ".png", frame)
+
+            handCount+=1
             if handCount == framesToGather:
                 break
-        else:
-            #todo save some failed images
 
-            failedDetectionFile.write(frame_path + "\n")
-            failedDetectionCount+=1
         frameCount+=1
 
     if(handCount == framesToGather):

@@ -64,7 +64,7 @@ classMap = {
 'zoom_in_with_index_finger_and_thumb': '9'
 }
 
-dataset = '/home/exx/hannah/GitProjects/microgesture/processedImages.csv'
+dataset = '/home/exx/hannah/GitProjects/microgesture/processedImages-full.csv'
 model_save_path = '/home/exx/hannah/GitProjects/microgesture/landmarkClassifier.hdf5'
 
 NUM_CLASSES = 49 #number of gestures

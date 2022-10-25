@@ -12,4 +12,4 @@ class Video():
 
     def trimFrames(self):
         #TODO trim frames down based on indexes
-        return OrderedDict(sorted(self.frames.items())[10:])
+        return OrderedDict(sorted(self.frames.items()))

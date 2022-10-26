@@ -64,12 +64,12 @@ classMap = {
 'zoom_in_with_index_finger_and_thumb': '9'
 }
 
-dataset = '/home/exx/hannah/GitProjects/microgesture/processedImages-full.csv'
+dataset = '/home/exx/hannah/GitProjects/microgesture/processedImages_50padding_5frames.csv'
 model_save_path = '/home/exx/hannah/GitProjects/microgesture/landmarkClassifier.hdf5'
 
 NUM_CLASSES = 49 #number of gestures
 RANDOM_SEED = 42
-LANDMARKS = 2100 #21 * 2 * frames gathered
+LANDMARKS = 42 * 5 #21 * 2 * frames gathered
 
 def PlotCM(cm, classes, normalize=False, title='Confusion matrix', cmap=plt.cm.Blues):
 		'''
@@ -102,7 +102,7 @@ def PlotCM(cm, classes, normalize=False, title='Confusion matrix', cmap=plt.cm.B
 labels = np.loadtxt(fname=dataset, delimiter=',', dtype='int32', usecols=(0), skiprows=1)
 features = np.loadtxt(dataset, delimiter=',', dtype='float32', usecols=list(range(1, LANDMARKS + 1)), skiprows=1)
 
-featuresTrain, featuresTest, labelsTrain, labelsText = train_test_split(features, labels, train_size=0.75, random_state=RANDOM_SEED)
+featuresTrain, featuresTest, labelsTrain, labelsText = train_test_split(features, labels, train_size=0.90, random_state=RANDOM_SEED)
 
 model = tf.keras.models.Sequential([
     tf.keras.layers.Input(LANDMARKS),
@@ -127,13 +127,13 @@ model.compile(
 model.fit(
     featuresTrain,
     labelsTrain,
-    epochs=1000,
-    batch_size=128,
+    epochs=10000,
+    batch_size=16,
     validation_data=(featuresTest, labelsText),
     callbacks=[cp_callback]
 )
 
-val_loss, val_acc = model.evaluate(featuresTest, labelsText, batch_size=128)
+val_loss, val_acc = model.evaluate(featuresTest, labelsText, batch_size=256)
 model = tf.keras.models.load_model(model_save_path)
 
 predict_result = model.predict(np.array([featuresTest[0]]))

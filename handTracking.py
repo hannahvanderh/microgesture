@@ -107,7 +107,7 @@ frameCount = 0
 failedDetectionCount = 0
 videoCount = 0
 imageCount = 0
-framesToGather = 30
+framesToGather = 5
 videos = {}
 
 failedDetections = "/home/exx/hannah/GitProjects/microgesture/failedDetections.txt"
@@ -154,43 +154,56 @@ for index, img_path in enumerate(paths):
         frameIndex = split[-1].split("=")[1].split(".")[0]
         video.addFrame(int(frameIndex), inputFolder + img_path)
 
-for videoKey, video in videos.items():
+videoCount = 0
+videoLength = len(videos)
+hands = mpHands.Hands(max_num_hands=1, min_detection_confidence=0.5, min_tracking_confidence=0.5)
+while videoCount < videoLength:
+#for videoKey, video in videos.items():
+    videoKey = list(videos)[videoCount]
+    video = list(videos.values())[videoCount]
+
     normalized = []
     handCount = 0
     frameCount = 0
-    lastResult = NoneType
-    hands = mpHands.Hands(max_num_hands=1, min_detection_confidence=0.5, min_tracking_confidence=0.5)
+    lastResult = None
 
     print(videoKey)
-    print("Video:" + str(videoCount) + "/" + str(len(videos)))
+    print("Video:" + str(videoCount) + "/" + str(videoLength))
     videoCount+=1
 
     items = video.trimFrames().items()
     for frameKey, frame_path in items:
-        if frameCount >= 20:
+        if frameCount >= 50:
             image = cv2.imread(frame_path)
             h, w, c = image.shape
 
             frame = cv2.flip(image, 1)
             framergb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            result_hands = hands.process(framergb)
-            hands_result = result_hands.multi_hand_landmarks
+            hands_result = None
+            tries = 0
+            while hands_result == None:
+                result_hands = hands.process(framergb)
+                hands_result = result_hands.multi_hand_landmarks
+                tries+=1
 
-            if hands_result: 
-                lastResult = hands_result
-                # processHands(hands_result, frameCount == 20, videoKey)
-                processHands(hands_result, FALSE, '')
-                
-            else:
-                processHands(lastResult, FALSE, '')
+                if hands_result != None: 
+                    lastResult = hands_result
+                    # processHands(hands_result, frameCount == 20, videoKey)
+                    processHands(hands_result, FALSE, '')
+                    handCount+=1
+                else:
+                    if tries == 5:
+                        # if lastResult != None:
+                        #     processHands(lastResult, FALSE, '')
 
-                failedDetectionFile.write(frame_path + "\n")
-                failedDetectionCount+=1
-                if failedDetectionCount % 10 == 0:
-                    cv2.imwrite("/home/exx/hannah/GitProjects/microgesture/failedDetections/" + str(failedDetectionCount) + ".png", frame)
-
-            handCount+=1
+                        failedDetectionFile.write(frame_path + "\n")
+                        failedDetectionCount+=1
+                        if failedDetectionCount % 1 == 0:
+                            cv2.imwrite("/home/exx/hannah/GitProjects/microgesture/failedDetections/" + str(failedDetectionCount) + ".png", frame)
+                        
+                        break
+  
             if handCount == framesToGather:
                 break
 

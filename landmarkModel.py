@@ -12,64 +12,75 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, classification_report
 import itertools
 
+# classMap = {
+# 'tap_on_distal_phalanx_of_index_finger_using_thumb': '0',
+# 'one': '1', 
+# 'double_tap_on_distal_phalanx_for_ring_finger_with_thumb': '10',
+# 'index_finger_swipe_right': '11',
+# 'index_finger_swipe_down': '12',
+# 'tap_on_distal_phalanx_of_last_finger_using_thumb': '13',
+# 'tap_on_distal_phalanx_of_middle_finger_using_thumb': '14',
+# 'index_finger_single_tap': '15', 
+# 'hand_close': '16', 
+# 'tap_on_middle_phalanx_of_index_finger_using_thumb': '17', 
+# 'two': '18', 
+# 'tap_on_proximal_phalanx_of_index_finger_using_thumb': '19',
+# 'double_tap_on_middle_phalanx_for_index_finger_with_thumb': '2',
+# 'zoom_out_with_index_finger_and_thumb': '20', 
+# 'double_tap_on_middle_phalanx_for_last_finger_using_thumb': '21',
+# 'index_finger_swipe_up': '22',
+# 'rub_thumb_on_index_finger_forward': '23',
+# 'rub_thumb_on_index_finger_backward': '24', 
+# 'tap_on_distal_phalanx_of_ring_finger_with_thumb': '25', 
+# 'double_tap_on_distal_phalanx_for_last_finger_using_thumb': '26', 
+# 'three': '27', 
+# 'double_tap_on_proximal_phalanx_of_last_finger_using_thumb': '28', 
+# 'index_finger_double_tap': '29',
+# 'select_with_thumb_and_finger': '3', 
+# 'rotate_index_finger_anti-clockwise': '30', 
+# 'double_tap_on_distal_phalanx_for_index_finger_usin3g_thumb': '31',
+# 'rub_on_index_finger_with_thumb_clockwise': '32', 
+# 'double_tap_on_proximal_phalanx_for_index_finger_using_thumb': '33',
+# 'tap_on_middle_phalanx_of_middle_finger_using_thumb': '34',
+# 'tap_on_proximal_phalanx_of_last_finger_using_thumb': '35',
+# 'tap_on_middle_phalanx_of_last_finger_using_thumb': '36',
+# 'index_finger_swipe_left': '37',
+# 'tap_on_proximal_phalanx_of_ring_finger_using_thumb': '38',
+# 'four': '39',
+# 'rub_on_index_finger_with_thumb_anti-clockwise': '4',
+# 'double_tap_on_proximal_phalanx_for_ring_finger_with_thumb': '40',
+# 'zoom_out_with_fingers': '41',
+# 'rotate_index_finger_clockwise': '42',
+# 'double_tap_on_distal_phalanx_for_middle_finger_using_thumb': '43',
+# 'double_tap_on_middle_phalanx_for_middle_finger_using_thumb': '44',
+# 'zoom_in_with_fingers': '45',
+# 'five': '46',
+# 'double_tap_on_middle_phalanx_for_ring_finger_with_thumb': '47',
+# 'snap': '48',
+# 'double_tap_on_proximal_phalanx_for_middle_finger_using_thumb': '5',
+# 'tap_on_middle_phalanx_of_ring_finger_with_thumb': '6',
+# 'tap_on_proximal_phalanx_of_middle_finger_using_thumb': '7', 
+# 'hand_open': '8',
+# 'zoom_in_with_index_finger_and_thumb': '9'
+# }
+
 classMap = {
-'tap_on_distal_phalanx_of_index_finger_using_thumb': '0',
-'one': '1', 
-'double_tap_on_distal_phalanx_for_ring_finger_with_thumb': '10',
-'index_finger_swipe_right': '11',
-'index_finger_swipe_down': '12',
-'tap_on_distal_phalanx_of_last_finger_using_thumb': '13',
-'tap_on_distal_phalanx_of_middle_finger_using_thumb': '14',
-'index_finger_single_tap': '15', 
-'hand_close': '16', 
-'tap_on_middle_phalanx_of_index_finger_using_thumb': '17', 
-'two': '18', 
-'tap_on_proximal_phalanx_of_index_finger_using_thumb': '19',
-'double_tap_on_middle_phalanx_for_index_finger_with_thumb': '2',
-'zoom_out_with_index_finger_and_thumb': '20', 
-'double_tap_on_middle_phalanx_for_last_finger_using_thumb': '21',
-'index_finger_swipe_up': '22',
-'rub_thumb_on_index_finger_forward': '23',
-'rub_thumb_on_index_finger_backward': '24', 
-'tap_on_distal_phalanx_of_ring_finger_with_thumb': '25', 
-'double_tap_on_distal_phalanx_for_last_finger_using_thumb': '26', 
-'three': '27', 
-'double_tap_on_proximal_phalanx_of_last_finger_using_thumb': '28', 
-'index_finger_double_tap': '29',
-'select_with_thumb_and_finger': '3', 
-'rotate_index_finger_anti-clockwise': '30', 
-'double_tap_on_distal_phalanx_for_index_finger_usin3g_thumb': '31',
-'rub_on_index_finger_with_thumb_clockwise': '32', 
-'double_tap_on_proximal_phalanx_for_index_finger_using_thumb': '33',
-'tap_on_middle_phalanx_of_middle_finger_using_thumb': '34',
-'tap_on_proximal_phalanx_of_last_finger_using_thumb': '35',
-'tap_on_middle_phalanx_of_last_finger_using_thumb': '36',
-'index_finger_swipe_left': '37',
-'tap_on_proximal_phalanx_of_ring_finger_using_thumb': '38',
-'four': '39',
-'rub_on_index_finger_with_thumb_anti-clockwise': '4',
-'double_tap_on_proximal_phalanx_for_ring_finger_with_thumb': '40',
-'zoom_out_with_fingers': '41',
-'rotate_index_finger_clockwise': '42',
-'double_tap_on_distal_phalanx_for_middle_finger_using_thumb': '43',
-'double_tap_on_middle_phalanx_for_middle_finger_using_thumb': '44',
-'zoom_in_with_fingers': '45',
-'five': '46',
-'double_tap_on_middle_phalanx_for_ring_finger_with_thumb': '47',
-'snap': '48',
-'double_tap_on_proximal_phalanx_for_middle_finger_using_thumb': '5',
-'tap_on_middle_phalanx_of_ring_finger_with_thumb': '6',
-'tap_on_proximal_phalanx_of_middle_finger_using_thumb': '7', 
-'hand_open': '8',
-'zoom_in_with_index_finger_and_thumb': '9'
+'taps': '1',
+'move': '2', 
+'number': '3',
+'open_close': '4',
+'rotate': '5',
+'zoom': '6',
+'slide': '7',
+'snap': '8'
 }
 
-dataset = '/home/exx/hannah/GitProjects/microgesture/processedImages_50padding_5frames.csv'
+dataset = '/home/exx/hannah/GitProjects/microgesture/processedImages_subGesture.csv'
 model_save_path = '/home/exx/hannah/GitProjects/microgesture/landmarkClassifier.hdf5'
 
-NUM_CLASSES = 49 #number of gestures
+NUM_CLASSES = 9 #number of gestures
 RANDOM_SEED = 42
-LANDMARKS = 42 * 5 #21 * 2 * frames gathered
+LANDMARKS = 42 * 30 #21 * 2 * frames gathered
 
 def PlotCM(cm, classes, normalize=False, title='Confusion matrix', cmap=plt.cm.Blues):
 		'''
@@ -102,7 +113,7 @@ def PlotCM(cm, classes, normalize=False, title='Confusion matrix', cmap=plt.cm.B
 labels = np.loadtxt(fname=dataset, delimiter=',', dtype='int32', usecols=(0), skiprows=1)
 features = np.loadtxt(dataset, delimiter=',', dtype='float32', usecols=list(range(1, LANDMARKS + 1)), skiprows=1)
 
-featuresTrain, featuresTest, labelsTrain, labelsText = train_test_split(features, labels, train_size=0.90, random_state=RANDOM_SEED)
+featuresTrain, featuresTest, labelsTrain, labelsText = train_test_split(features, labels, train_size=0.75, random_state=RANDOM_SEED)
 
 model = tf.keras.models.Sequential([
     tf.keras.layers.Input(LANDMARKS),
@@ -127,7 +138,7 @@ model.compile(
 model.fit(
     featuresTrain,
     labelsTrain,
-    epochs=10000,
+    epochs=1000,
     batch_size=16,
     validation_data=(featuresTest, labelsText),
     callbacks=[cp_callback]

@@ -38,7 +38,7 @@ classMap = {
 'index_finger_double_tap': '29',
 'select_with_thumb_and_finger': '3', 
 'rotate_index_finger_anti-clockwise': '30', 
-'double_tap_on_distal_phalanx_for_index_finger_using_thumb': '31',
+'double_tap_on_distal_phalanx_for_index_finger_usin3g_thumb': '31',
 'rub_on_index_finger_with_thumb_clockwise': '32', 
 'double_tap_on_proximal_phalanx_for_index_finger_using_thumb': '33',
 'tap_on_middle_phalanx_of_middle_finger_using_thumb': '34',

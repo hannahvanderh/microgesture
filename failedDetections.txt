@@ -1,6 +1,0 @@
-/data/MGDataset/real_data_v2/rgb/real_rgb_Left_double_tap_on_middle_phalanx_of_ring_finger_using_thumb_p=03_g=47_v=203_f=000051.png
-/data/MGDataset/real_data_v2/rgb/real_rgb_Left_double_tap_on_middle_phalanx_of_ring_finger_using_thumb_p=03_g=47_v=203_f=000052.png
-/data/MGDataset/real_data_v2/rgb/real_rgb_Left_double_tap_on_middle_phalanx_of_ring_finger_using_thumb_p=03_g=47_v=203_f=000053.png
-/data/MGDataset/real_data_v2/rgb/real_rgb_Left_double_tap_on_middle_phalanx_of_ring_finger_using_thumb_p=03_g=47_v=203_f=000054.png
-/data/MGDataset/real_data_v2/rgb/real_rgb_Right_zoom_in_with_index_finger_and_thumb_p=08_g=9_v=399_f=000051.png
-/data/MGDataset/real_data_v2/rgb/real_rgb_Right_zoom_out_using_palm_p=08_g=41_v=390_f=000051.png

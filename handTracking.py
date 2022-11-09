@@ -21,12 +21,54 @@ import torch
 import glob
 import copy
 import itertools
+from enum import Enum
 
 from videoModel import Video
 
 #TODO
 #make default parameters and allow the user to pass in the gesture video name, name output files accordingly
 #load and process an entire directory of videos (wild animals dataset from last semester)
+
+class SubGesture(Enum):
+     TAPS = 1
+     MOVE = 2
+     NUMBER = 3
+     OPEN_CLOSE = 4
+     ROTATE = 5
+     ZOOM = 6
+     SLIDE = 7
+     SNAP = 8
+
+def getSubGesture(gestureIndex):
+    match gestureIndex:
+        case 0 | 13 | 14 | 15 | 17 | 19 | 25 | 34 | 35 | 36 | 38 | 6 | 7:
+            #single taps
+            return 1
+        case 10 | 2 | 21 | 26 | 28 | 29 | 31 | 33 | 40 | 43 | 44 | 47 | 5:
+            #double taps
+            return 1
+        case 1 | 18 | 27 | 39 | 46:
+            #number
+            return 3
+        case 11 | 12 | 22 | 3 | 37:
+            #move
+            return 2
+        case 16 | 8:
+            #open and close
+            return 4
+        case 20 | 41 | 45 | 9:
+            #zoom
+            return 6
+        case 23 | 24:
+            #slide
+            return 7
+        case 30 | 32 | 4 | 42 :
+            #rotate
+            return 5
+        case 48:
+            #snap
+            return 8
+        
 
 def getLabelIndex(value):
     split = value.split("_")
@@ -36,7 +78,7 @@ def removeNewLines(value):
     return value.replace('\n',' ')
 
 def log_csv(number, landmark_list):
-    csv_path = csv_path = '/home/exx/hannah/GitProjects/microgesture/processedImages.csv'
+    csv_path = csv_path = '/home/exx/hannah/GitProjects/microgesture/processedImages_subGesture.csv'
     with open(csv_path, 'a', newline="") as f:
         writer = csv.writer(f)
         writer.writerow([number, *landmark_list])
@@ -49,7 +91,7 @@ def processHands(hands_result, save, name):
             normalized.append(landmark)
         if save == TRUE:
             mpDraw.draw_landmarks(frame, hand, mpHands.HAND_CONNECTIONS)
-            cv2.imwrite("/home/exx/hannah/GitProjects/microgesture/savedImages/" + str(name) + ".png", frame)
+            cv2.imwrite("/home/exx/hannah/GitProjects/microgesture/examples/" + str(name) + ".png", frame)
 
 def calc_landmark_list(image, hand):
     image_width, image_height = image.shape[1], image.shape[0]
@@ -107,7 +149,7 @@ frameCount = 0
 failedDetectionCount = 0
 videoCount = 0
 imageCount = 0
-framesToGather = 5
+framesToGather = 30
 videos = {}
 
 failedDetections = "/home/exx/hannah/GitProjects/microgesture/failedDetections.txt"
@@ -173,7 +215,7 @@ while videoCount < videoLength:
 
     items = video.trimFrames().items()
     for frameKey, frame_path in items:
-        if frameCount >= 50:
+        if frameCount >= 20:
             image = cv2.imread(frame_path)
             h, w, c = image.shape
 
@@ -190,7 +232,7 @@ while videoCount < videoLength:
                 if hands_result != None: 
                     lastResult = hands_result
                     # processHands(hands_result, frameCount == 20, videoKey)
-                    processHands(hands_result, FALSE, '')
+                    processHands(hands_result, TRUE, frameKey)
                     handCount+=1
                 else:
                     if tries == 5:
@@ -210,7 +252,8 @@ while videoCount < videoLength:
         frameCount+=1
 
     if(handCount == framesToGather):
-        log_csv(video.gestureIndex, normalized)  
+        # todo sub gesture 
+        log_csv(str(getSubGesture(int(video.gestureIndex))), normalized)  
     else:
         print("Failed to get enough frames")  
 
